@@ -19,17 +19,17 @@ var FileType = NewType("file", `represents an open file`)
 var errClosed = ExceptionNewf(ValueError, "I/O operation on closed file.")
 
 func init() {
-	FileType.Dict["write"] = MustNewMethod("write", func(self Object, value Object) (Object, error) {
+	FileType.Dict[String("write")] = MustNewMethod("write", func(self Object, value Object) (Object, error) {
 		return self.(*File).Write(value)
 	}, 0, "write(arg) -> writes the contents of arg to the file, returning the number of characters written.")
 
-	FileType.Dict["read"] = MustNewMethod("read", func(self Object, args Tuple, kwargs StringDict) (Object, error) {
+	FileType.Dict[String("read")] = MustNewMethod("read", func(self Object, args Tuple, kwargs Dict) (Object, error) {
 		return self.(*File).Read(args, kwargs)
 	}, 0, "read([size]) -> read at most size bytes, returned as a string.\n\nIf the size argument is negative or omitted, read until EOF is reached.\nNotice that when in non-blocking mode, less data than what was requested\nmay be returned, even if no size parameter was given.")
-	FileType.Dict["close"] = MustNewMethod("close", func(self Object) (Object, error) {
+	FileType.Dict[String("close")] = MustNewMethod("close", func(self Object) (Object, error) {
 		return self.(*File).Close()
 	}, 0, "close() -> None or (perhaps) an integer.  Close the file.\n\nSets data attribute .closed to True.  A closed file cannot be used for\nfurther I/O operations.  close() may be called more than once without\nerror.  Some kinds of file objects (for example, opened by popen())\nmay return an exit status upon closing.")
-	FileType.Dict["flush"] = MustNewMethod("flush", func(self Object) (Object, error) {
+	FileType.Dict[String("flush")] = MustNewMethod("flush", func(self Object) (Object, error) {
 		return self.(*File).Flush()
 	}, 0, "flush() -> Flush the write buffers of the stream if applicable. This does nothing for read-only and non-blocking streams.")
 }
@@ -97,7 +97,7 @@ func (o *File) readResult(b []byte) (Object, error) {
 	return String(""), nil
 }
 
-func (o *File) Read(args Tuple, kwargs StringDict) (Object, error) {
+func (o *File) Read(args Tuple, kwargs Dict) (Object, error) {
 	var arg Object = None
 
 	err := UnpackTuple(args, kwargs, "read", 0, 1, &arg)

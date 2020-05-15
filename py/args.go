@@ -412,7 +412,7 @@ package py
 // introspection to set it properly
 
 // ParseTupleAndKeywords
-func ParseTupleAndKeywords(args Tuple, kwargs StringDict, format string, kwlist []string, results ...*Object) error {
+func ParseTupleAndKeywords(args Tuple, kwargs Dict, format string, kwlist []string, results ...*Object) error {
 	if kwlist != nil && len(results) != len(kwlist) {
 		return ExceptionNewf(TypeError, "Internal error: supply the same number of results and kwlist")
 	}
@@ -431,7 +431,7 @@ func ParseTupleAndKeywords(args Tuple, kwargs StringDict, format string, kwlist 
 	// O(N^2) Slow but kwlist is usually short
 	for kwargName := range kwargs {
 		for _, kw := range kwlist {
-			if kw == kwargName {
+			if kw == string(kwargName.(String)) {
 				goto found
 			}
 		}
@@ -442,7 +442,7 @@ func ParseTupleAndKeywords(args Tuple, kwargs StringDict, format string, kwlist 
 	// Create args tuple with all the arguments we have in
 	args = args.Copy()
 	for i, kw := range kwlist {
-		if value, ok := kwargs[kw]; ok {
+		if value, ok := kwargs[String(kw)]; ok {
 			if len(args) > i {
 				return ExceptionNewf(TypeError, "%s() got multiple values for argument '%s'", name, kw)
 			}
@@ -552,7 +552,7 @@ func checkNumberOfArgs(name string, nargs, nresults, min, max int) error {
 // Unpack the args tuple into the results
 //
 // Up to the caller to set default values
-func UnpackTuple(args Tuple, kwargs StringDict, name string, min int, max int, results ...*Object) error {
+func UnpackTuple(args Tuple, kwargs Dict, name string, min int, max int, results ...*Object) error {
 	if len(kwargs) != 0 {
 		return ExceptionNewf(TypeError, "%s() does not take keyword arguments", name)
 	}

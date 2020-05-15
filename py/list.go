@@ -19,7 +19,7 @@ type List struct {
 
 func init() {
 	// FIXME: all methods should be callable using list.method([], *args, **kwargs) or [].method(*args, **kwargs)
-	ListType.Dict["append"] = MustNewMethod("append", func(self Object, args Tuple) (Object, error) {
+	ListType.Dict[String("append")] = MustNewMethod("append", func(self Object, args Tuple) (Object, error) {
 		listSelf := self.(*List)
 		if len(args) != 1 {
 			return nil, ExceptionNewf(TypeError, "append() takes exactly one argument (%d given)", len(args))
@@ -28,7 +28,7 @@ func init() {
 		return NoneType{}, nil
 	}, 0, "append(item)")
 
-	ListType.Dict["extend"] = MustNewMethod("extend", func(self Object, args Tuple) (Object, error) {
+	ListType.Dict[String("extend")] = MustNewMethod("extend", func(self Object, args Tuple) (Object, error) {
 		listSelf := self.(*List)
 		if len(args) != 1 {
 			return nil, ExceptionNewf(TypeError, "append() takes exactly one argument (%d given)", len(args))
@@ -39,7 +39,7 @@ func init() {
 		return NoneType{}, nil
 	}, 0, "extend([item])")
 
-	ListType.Dict["sort"] = MustNewMethod("sort", func(self Object, args Tuple, kwargs StringDict) (Object, error) {
+	ListType.Dict[String("sort")] = MustNewMethod("sort", func(self Object, args Tuple, kwargs Dict) (Object, error) {
 		const funcName = "sort"
 		var l *List
 		if self == None {
@@ -77,7 +77,7 @@ func (o *List) Type() *Type {
 }
 
 // ListNew
-func ListNew(metatype *Type, args Tuple, kwargs StringDict) (res Object, err error) {
+func ListNew(metatype *Type, args Tuple, kwargs Dict) (res Object, err error) {
 	var iterable Object
 	err = UnpackTuple(args, kwargs, "list", 0, 1, &iterable)
 	if err != nil {
@@ -467,7 +467,7 @@ func (s ptrSortable) Less(i, j int) bool {
 
 // SortInPlace sorts the given List in place using a stable sort.
 // kwargs can have the keys "key" and "reverse".
-func SortInPlace(l *List, kwargs StringDict, funcName string) error {
+func SortInPlace(l *List, kwargs Dict, funcName string) error {
 	var keyFunc Object
 	var reverse Object
 	err := ParseTupleAndKeywords(nil, kwargs, "|$OO:"+funcName, []string{"key", "reverse"}, &keyFunc, &reverse)

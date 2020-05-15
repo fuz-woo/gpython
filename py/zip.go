@@ -29,7 +29,7 @@ func (z *Zip) Type() *Type {
 }
 
 // ZipTypeNew
-func ZipTypeNew(metatype *Type, args Tuple, kwargs StringDict) (Object, error) {
+func ZipTypeNew(metatype *Type, args Tuple, kwargs Dict) (Object, error) {
 	tupleSize := len(args)
 	itTuple := make(Tuple, tupleSize)
 	for i := 0; i < tupleSize; i++ {

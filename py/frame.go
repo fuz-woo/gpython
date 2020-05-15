@@ -26,13 +26,13 @@ type TryBlock struct {
 // A python Frame object
 type Frame struct {
 	// Back       *Frame        // previous frame, or nil
-	Code            *Code      // code segment
-	Builtins        StringDict // builtin symbol table
-	Globals         StringDict // global symbol table
-	Locals          StringDict // local symbol table
-	Stack           []Object   // Valuestack
-	LocalVars       Tuple      // Fast access local vars
-	CellAndFreeVars Tuple      // Cellvars then Freevars Cell objects in one Tuple
+	Code            *Code    // code segment
+	Builtins        Dict     // builtin symbol table
+	Globals         Dict     // global symbol table
+	Locals          Dict     // local symbol table
+	Stack           []Object // Valuestack
+	LocalVars       Tuple    // Fast access local vars
+	CellAndFreeVars Tuple    // Cellvars then Freevars Cell objects in one Tuple
 
 	// Next free slot in f_valuestack.  Frame creation sets to f_valuestack.
 	// Frame evaluation usually NULLs it, but a frame that yields sets it
@@ -77,7 +77,7 @@ func (o *Frame) Type() *Type {
 }
 
 // Make a new frame for a code object
-func NewFrame(globals, locals StringDict, code *Code, closure Tuple) *Frame {
+func NewFrame(globals, locals Dict, code *Code, closure Tuple) *Frame {
 	nlocals := int(code.Nlocals)
 	ncells := len(code.Cellvars)
 	nfrees := len(code.Freevars)
@@ -108,13 +108,13 @@ func NewFrame(globals, locals StringDict, code *Code, closure Tuple) *Frame {
 func (f *Frame) LookupGlobal(name string) (obj Object, ok bool) {
 	// Lookup in globals
 	// fmt.Printf("globals = %v\n", f.Globals)
-	if obj, ok = f.Globals[name]; ok {
+	if obj, ok = f.Globals[String(name)]; ok {
 		return
 	}
 
 	// Lookup in builtins
 	// fmt.Printf("builtins = %v\n", Builtins.Globals)
-	if obj, ok = f.Builtins[name]; ok {
+	if obj, ok = f.Builtins[String(name)]; ok {
 		return
 	}
 
@@ -129,7 +129,7 @@ func (f *Frame) LookupGlobal(name string) (obj Object, ok bool) {
 func (f *Frame) Lookup(name string) (obj Object, ok bool) {
 	// Lookup in locals
 	// fmt.Printf("locals = %v\n", f.Locals)
-	if obj, ok = f.Locals[name]; ok {
+	if obj, ok = f.Locals[String(name)]; ok {
 		return
 	}
 
@@ -168,7 +168,7 @@ func (f *Frame) PopBlock() {
    and the value is extracted from the cell variable before being put
    in dict.
 */
-func map_to_dict(mapping []string, nmap int, dict StringDict, values []Object, deref bool) {
+func map_to_dict(mapping []string, nmap int, dict Dict, values []Object, deref bool) {
 	for j := nmap - 1; j >= 0; j-- {
 		key := mapping[j]
 		value := values[j]
@@ -180,9 +180,9 @@ func map_to_dict(mapping []string, nmap int, dict StringDict, values []Object, d
 			value = cell.Get()
 		}
 		if value == nil {
-			delete(dict, key)
+			delete(dict, String(key))
 		} else {
-			dict[key] = value
+			dict[String(key)] = value
 		}
 	}
 }
@@ -207,10 +207,10 @@ func map_to_dict(mapping []string, nmap int, dict StringDict, values []Object, d
    Exceptions raised while modifying the dict are silently ignored,
    because there is no good way to report them.
 */
-func dict_to_map(mapping []string, nmap int, dict StringDict, values []Object, deref bool, clear bool) {
+func dict_to_map(mapping []string, nmap int, dict Dict, values []Object, deref bool, clear bool) {
 	for j := nmap - 1; j >= 0; j-- {
 		key := mapping[j]
-		value := dict[key]
+		value := dict[String(key)]
 		/* We only care about nils if clear is true. */
 		if value == nil {
 			if !clear {
@@ -235,7 +235,7 @@ func dict_to_map(mapping []string, nmap int, dict StringDict, values []Object, d
 func (f *Frame) FastToLocals() {
 	locals := f.Locals
 	if locals == nil {
-		locals = NewStringDict()
+		locals = NewDict()
 		f.Locals = locals
 	}
 	co := f.Code

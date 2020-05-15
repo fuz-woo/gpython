@@ -1333,7 +1333,7 @@ func init() {
 		py.MustNewMethod("trunc", math_trunc, 0, math_trunc_doc),
 		py.MustNewMethod("to_ulps", math_to_ulps, 0, math_to_ulps_doc),
 	}
-	globals := py.StringDict{
+	globals := py.Dict{
 		"pi": py.Float(math.Pi),
 		"e":  py.Float(math.E),
 	}

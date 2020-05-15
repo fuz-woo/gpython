@@ -33,7 +33,7 @@ func (o Bytes) Type() *Type {
 }
 
 // BytesNew
-func BytesNew(metatype *Type, args Tuple, kwargs StringDict) (res Object, err error) {
+func BytesNew(metatype *Type, args Tuple, kwargs Dict) (res Object, err error) {
 	var x Object
 	var encoding Object
 	var errors Object

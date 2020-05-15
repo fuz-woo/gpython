@@ -28,20 +28,20 @@ var (
 )
 
 func init() {
-	StringDictType.Dict["items"] = MustNewMethod("items", func(self Object, args Tuple) (Object, error) {
+	DictType.Dict[String("items")] = MustNewMethod("items", func(self Object, args Tuple) (Object, error) {
 		err := UnpackTuple(args, nil, "items", 0, 0)
 		if err != nil {
 			return nil, err
 		}
-		sMap := self.(StringDict)
+		sMap := self.(Dict)
 		o := make([]Object, 0, len(sMap))
 		for k, v := range sMap {
-			o = append(o, Tuple{String(k), v})
+			o = append(o, Tuple{k, v})
 		}
 		return NewIterator(o), nil
 	}, 0, "items() -> list of D's (key, value) pairs, as 2-tuples")
 
-	StringDictType.Dict["get"] = MustNewMethod("get", func(self Object, args Tuple) (Object, error) {
+	DictType.Dict[String("get")] = MustNewMethod("get", func(self Object, args Tuple) (Object, error) {
 		var length = len(args)
 		switch {
 		case length == 0:
@@ -49,9 +49,9 @@ func init() {
 		case length > 2:
 			return nil, ExceptionNewf(TypeError, "%s expected at most 2 arguments, got %d", "items()", length)
 		}
-		sMap := self.(StringDict)
+		sMap := self.(Dict)
 		if str, ok := args[0].(String); ok {
-			if res, ok := sMap[string(str)]; ok {
+			if res, ok := sMap[str]; ok {
 				return res, nil
 			}
 
@@ -69,26 +69,26 @@ func init() {
 // String to object dictionary
 //
 // Used for variables etc where the keys can only be strings
-type StringDict map[string]Object
+type Dict map[Object]Object
 
 // Type of this StringDict object
-func (o StringDict) Type() *Type {
-	return StringDictType
+func (o Dict) Type() *Type {
+	return DictType
 }
 
 // Make a new dictionary
-func NewStringDict() StringDict {
-	return make(StringDict)
+func NewDict() Dict {
+	return make(Dict)
 }
 
 // Make a new dictionary with reservation for n entries
-func NewStringDictSized(n int) StringDict {
-	return make(StringDict, n)
+func NewDictSized(n int) Dict {
+	return make(Dict, n)
 }
 
 // Checks that obj is exactly a dictionary and returns an error if not
-func DictCheckExact(obj Object) (StringDict, error) {
-	dict, ok := obj.(StringDict)
+func DictCheckExact(obj Object) (Dict, error) {
+	dict, ok := obj.(Dict)
 	if !ok {
 		return nil, expectingDict
 	}
@@ -96,25 +96,25 @@ func DictCheckExact(obj Object) (StringDict, error) {
 }
 
 // Checks that obj is exactly a dictionary and returns an error if not
-func DictCheck(obj Object) (StringDict, error) {
+func DictCheck(obj Object) (Dict, error) {
 	// FIXME should be checking subclasses
 	return DictCheckExact(obj)
 }
 
 // Copy a dictionary
-func (d StringDict) Copy() StringDict {
-	e := make(StringDict, len(d))
+func (d Dict) Copy() Dict {
+	e := make(Dict, len(d))
 	for k, v := range d {
 		e[k] = v
 	}
 	return e
 }
 
-func (a StringDict) M__str__() (Object, error) {
+func (a Dict) M__str__() (Object, error) {
 	return a.M__repr__()
 }
 
-func (a StringDict) M__repr__() (Object, error) {
+func (a Dict) M__repr__() (Object, error) {
 	var out bytes.Buffer
 	out.WriteRune('{')
 	spacer := false
@@ -122,7 +122,7 @@ func (a StringDict) M__repr__() (Object, error) {
 		if spacer {
 			out.WriteString(", ")
 		}
-		keyStr, err := ReprAsString(String(key))
+		keyStr, err := ReprAsString(key)
 		if err != nil {
 			return nil, err
 		}
@@ -140,18 +140,18 @@ func (a StringDict) M__repr__() (Object, error) {
 }
 
 // Returns a list of keys from the dict
-func (d StringDict) M__iter__() (Object, error) {
+func (d Dict) M__iter__() (Object, error) {
 	o := make([]Object, 0, len(d))
 	for k := range d {
-		o = append(o, String(k))
+		o = append(o, k)
 	}
 	return NewIterator(o), nil
 }
 
-func (d StringDict) M__getitem__(key Object) (Object, error) {
+func (d Dict) M__getitem__(key Object) (Object, error) {
 	str, ok := key.(String)
 	if ok {
-		res, ok := d[string(str)]
+		res, ok := d[str]
 		if ok {
 			return res, nil
 		}
@@ -159,17 +159,17 @@ func (d StringDict) M__getitem__(key Object) (Object, error) {
 	return nil, ExceptionNewf(KeyError, "%v", key)
 }
 
-func (d StringDict) M__setitem__(key, value Object) (Object, error) {
-	str, ok := key.(String)
-	if !ok {
-		return nil, ExceptionNewf(KeyError, "FIXME can only have string keys!: %v", key)
-	}
-	d[string(str)] = value
+func (d Dict) M__setitem__(key, value Object) (Object, error) {
+	//str, ok := key.(String)
+	//if !ok {
+	//	return nil, ExceptionNewf(KeyError, "FIXME can only have string keys!: %v", key)
+	//}
+	d[key] = value
 	return None, nil
 }
 
-func (a StringDict) M__eq__(other Object) (Object, error) {
-	b, ok := other.(StringDict)
+func (a Dict) M__eq__(other Object) (Object, error) {
+	b, ok := other.(Dict)
 	if !ok {
 		return NotImplemented, nil
 	}
@@ -192,7 +192,7 @@ func (a StringDict) M__eq__(other Object) (Object, error) {
 	return True, nil
 }
 
-func (a StringDict) M__ne__(other Object) (Object, error) {
+func (a Dict) M__ne__(other Object) (Object, error) {
 	res, err := a.M__eq__(other)
 	if err != nil {
 		return nil, err
@@ -206,13 +206,13 @@ func (a StringDict) M__ne__(other Object) (Object, error) {
 	return True, nil
 }
 
-func (a StringDict) M__contains__(other Object) (Object, error) {
+func (a Dict) M__contains__(other Object) (Object, error) {
 	key, ok := other.(String)
 	if !ok {
 		return nil, ExceptionNewf(KeyError, "FIXME can only have string keys!: %v", key)
 	}
 
-	if _, ok := a[string(key)]; ok {
+	if _, ok := a[key]; ok {
 		return True, nil
 	}
 	return False, nil

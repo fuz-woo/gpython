@@ -20,7 +20,7 @@ type Exception struct {
 	Context         Object
 	Cause           Object
 	SuppressContext bool
-	Dict            StringDict // anything else that we want to stuff in
+	Dict            Dict // anything else that we want to stuff in
 }
 
 // A python exception info block
@@ -133,8 +133,9 @@ func (e *Exception) Error() string {
 		}
 	}
 	// FIXME Print out special stuff for things which look like SyntaxErrors
-	if e.Dict["lineno"] != nil {
-		message = fmt.Sprintf("\n  File \"%v\", line %v, offset %v\n    %s\n\n", e.Dict["filename"], e.Dict["lineno"], e.Dict["offset"], e.Dict["line"]) + message
+	if e.Dict[String("lineno")] != nil {
+		message = fmt.Sprintf("\n  File \"%v\", line %v, offset %v\n    %s\n\n", 
+			e.Dict[String("filename")], e.Dict[String("lineno")], e.Dict[String("offset")], e.Dict[String("line")]) + message
 	}
 	return message
 }
@@ -171,12 +172,12 @@ func exceptionNew(metatype *Type, args Tuple) *Exception {
 	return &Exception{
 		Base: metatype,
 		Args: args.Copy(),
-		Dict: make(StringDict),
+		Dict: make(Dict),
 	}
 }
 
 // ExceptionNew
-func ExceptionNew(metatype *Type, args Tuple, kwargs StringDict) (Object, error) {
+func ExceptionNew(metatype *Type, args Tuple, kwargs Dict) (Object, error) {
 	if len(kwargs) != 0 {
 		// FIXME this causes an initialization loop
 		// return nil, ExceptionNewf(TypeError, "%s does not take keyword arguments", metatype.Name)
@@ -191,7 +192,7 @@ func ExceptionNewf(metatype *Type, format string, a ...interface{}) *Exception {
 	return &Exception{
 		Base: metatype,
 		Args: Tuple{String(message)},
-		Dict: make(StringDict),
+		Dict: make(Dict),
 	}
 }
 
@@ -241,10 +242,10 @@ func MakeSyntaxError(r interface{}, filename string, lineno int, offset int, lin
 	// FIXME add more stuff to make it a SyntaxError!
 	// see Python/errors.c PyErr_SyntaxLocationObject
 	e := MakeException(r)
-	e.Dict["filename"] = String(filename)
-	e.Dict["lineno"] = Int(lineno)
-	e.Dict["offset"] = Int(offset)
-	e.Dict["line"] = String(line)
+	e.Dict[String("filename")] = String(filename)
+	e.Dict[String("lineno")] = Int(lineno)
+	e.Dict[String("offset")] = Int(offset)
+	e.Dict[String("line")] = String(line)
 	return e
 }
 

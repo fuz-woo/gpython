@@ -40,7 +40,7 @@ func (o *RangeIterator) Type() *Type {
 }
 
 // RangeNew
-func RangeNew(metatype *Type, args Tuple, kwargs StringDict) (Object, error) {
+func RangeNew(metatype *Type, args Tuple, kwargs Dict) (Object, error) {
 	var start Object
 	var stop Object
 	var step Object = Int(1)

@@ -18,7 +18,7 @@ func (o Tuple) Type() *Type {
 }
 
 // TupleNew
-func TupleNew(metatype *Type, args Tuple, kwargs StringDict) (res Object, err error) {
+func TupleNew(metatype *Type, args Tuple, kwargs Dict) (res Object, err error) {
 	var iterable Object
 	err = UnpackTuple(args, kwargs, "tuple", 0, 1, &iterable)
 	if err != nil {

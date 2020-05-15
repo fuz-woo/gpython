@@ -410,7 +410,7 @@ const getsizeof_doc = `getsizeof(object, default) -> int
 
 Return the size of object in bytes.`
 
-func sys_getsizeof(self py.Object, args py.Tuple, kwds py.StringDict) (py.Object, error) {
+func sys_getsizeof(self py.Object, args py.Tuple, kwds py.Dict) (py.Object, error) {
 	// py.Object res = nil;
 	//  py.Object gc_head_size = nil;
 	//  char *kwlist[] = {"object", "default", 0};
@@ -656,14 +656,14 @@ func init() {
 	stdin, stdout, stderr := &py.File{os.Stdin, py.FileRead},
 		&py.File{os.Stdout, py.FileWrite},
 		&py.File{os.Stderr, py.FileWrite}
-	globals := py.StringDict{
-		"argv":       argv,
-		"stdin":      stdin,
-		"stdout":     stdout,
-		"stderr":     stderr,
-		"__stdin__":  stdin,
-		"__stdout__": stdout,
-		"__stderr__": stderr,
+	globals := py.Dict{
+		py.String("argv"):       argv,
+		py.String("stdin"):      stdin,
+		py.String("stdout"):     stdout,
+		py.String("stderr"):     stderr,
+		py.String("__stdin__"):  stdin,
+		py.String("__stdout__"): stdout,
+		py.String("__stderr__"): stderr,
 		//"version": py.Int(MARSHAL_VERSION),
 		//     /* stdin/stdout/stderr are now set by pythonrun.c */
 

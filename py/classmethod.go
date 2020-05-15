@@ -29,7 +29,7 @@ If you want those, see the staticmethod builtin.`, ClassMethodNew, nil)
 
 type ClassMethod struct {
 	Callable Object
-	Dict     StringDict
+	Dict     Dict
 }
 
 // Type of this ClassMethod object
@@ -38,14 +38,14 @@ func (o ClassMethod) Type() *Type {
 }
 
 // Get the Dict
-func (c *ClassMethod) GetDict() StringDict {
+func (c *ClassMethod) GetDict() Dict {
 	return c.Dict
 }
 
 // ClassMethodNew
-func ClassMethodNew(metatype *Type, args Tuple, kwargs StringDict) (res Object, err error) {
+func ClassMethodNew(metatype *Type, args Tuple, kwargs Dict) (res Object, err error) {
 	c := &ClassMethod{
-		Dict: make(StringDict),
+		Dict: make(Dict),
 	}
 	err = UnpackTuple(args, kwargs, "classmethod", 1, 1, &c.Callable)
 	if err != nil {
@@ -64,7 +64,7 @@ func (c *ClassMethod) M__get__(instance, owner Object) (Object, error) {
 
 // Properties
 func init() {
-	ClassMethodType.Dict["__func__"] = &Property{
+	ClassMethodType.Dict[String("__func__")] = &Property{
 		Fget: func(self Object) (Object, error) {
 			return self.(*ClassMethod).Callable, nil
 		},

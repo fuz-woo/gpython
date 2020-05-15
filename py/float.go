@@ -30,7 +30,7 @@ func (o Float) Type() *Type {
 }
 
 // FloatNew
-func FloatNew(metatype *Type, args Tuple, kwargs StringDict) (Object, error) {
+func FloatNew(metatype *Type, args Tuple, kwargs Dict) (Object, error) {
 	var xObj Object = Float(0)
 	err := ParseTupleAndKeywords(args, kwargs, "|O", []string{"x"}, &xObj)
 	if err != nil {
@@ -396,7 +396,7 @@ func (a Float) M__ge__(other Object) (Object, error) {
 
 // Properties
 func init() {
-	FloatType.Dict["is_integer"] = MustNewMethod("is_integer", func(self Object) (Object, error) {
+	FloatType.Dict[String("is_integer")] = MustNewMethod("is_integer", func(self Object) (Object, error) {
 		if a, ok := convertToFloat(self); ok {
 			f, err := FloatAsFloat64(a)
 			if err != nil {

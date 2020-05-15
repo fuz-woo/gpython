@@ -12,7 +12,7 @@ import (
 	"github.com/go-python/gpython/py"
 )
 
-func builtinEvalOrExec(self py.Object, args py.Tuple, kwargs, currentLocals, currentGlobals, builtins py.StringDict, mode string) (py.Object, error) {
+func builtinEvalOrExec(self py.Object, args py.Tuple, kwargs, currentLocals, currentGlobals, builtins py.Dict, mode string) (py.Object, error) {
 	var (
 		cmd     py.Object
 		globals py.Object = py.None
@@ -41,8 +41,8 @@ func builtinEvalOrExec(self py.Object, args py.Tuple, kwargs, currentLocals, cur
 	}
 
 	// Set __builtins__ if not set
-	if _, ok := globalsDict["__builtins__"]; !ok {
-		globalsDict["__builtins__"] = builtins
+	if _, ok := globalsDict[py.String("__builtins__")]; !ok {
+		globalsDict[py.String("__builtins__")] = builtins
 	}
 
 	var codeStr string
@@ -72,11 +72,11 @@ func builtinEvalOrExec(self py.Object, args py.Tuple, kwargs, currentLocals, cur
 	return EvalCode(code, globalsDict, localsDict)
 }
 
-func builtinEval(self py.Object, args py.Tuple, kwargs, currentLocals, currentGlobals, builtins py.StringDict) (py.Object, error) {
+func builtinEval(self py.Object, args py.Tuple, kwargs, currentLocals, currentGlobals, builtins py.Dict) (py.Object, error) {
 	return builtinEvalOrExec(self, args, kwargs, currentLocals, currentGlobals, builtins, "eval")
 }
 
-func builtinExec(self py.Object, args py.Tuple, kwargs, currentLocals, currentGlobals, builtins py.StringDict) (py.Object, error) {
+func builtinExec(self py.Object, args py.Tuple, kwargs, currentLocals, currentGlobals, builtins py.Dict) (py.Object, error) {
 	_, err := builtinEvalOrExec(self, args, kwargs, currentLocals, currentGlobals, builtins, "exec")
 	if err != nil {
 		return nil, err

@@ -78,7 +78,7 @@ var (
 //
 // Changed in version 3.3: Negative values for level are no longer
 // supported (which also changes the default value to 0).
-func ImportModuleLevelObject(name string, globals, locals StringDict, fromlist Tuple, level int) (Object, error) {
+func ImportModuleLevelObject(name string, globals, locals Dict, fromlist Tuple, level int) (Object, error) {
 	// Module already loaded - return that
 	if module, ok := modules[name]; ok {
 		return module, nil
@@ -93,7 +93,7 @@ func ImportModuleLevelObject(name string, globals, locals StringDict, fromlist T
 
 	for _, mpath := range modulePath {
 		if mpath == "" {
-			mpathObj, ok := globals["__file__"]
+			mpathObj, ok := globals[String("__file__")]
 			if !ok {
 				var err error
 				mpath, err = os.Getwd()
@@ -135,7 +135,7 @@ func ImportModuleLevelObject(name string, globals, locals StringDict, fromlist T
 			if err != nil {
 				return nil, err
 			}
-			module.Globals["__file__"] = String(fullPath)
+			module.Globals[String("__file__")] = String(fullPath)
 			return module, nil
 		}
 	}
@@ -170,7 +170,7 @@ func XImportModuleLevelObject(nameObj, given_globals, locals, given_fromlist Obj
 	var mod Object
 	var PackageObj Object
 	var Package string
-	var globals StringDict
+	var globals Dict
 	var fromlist Tuple
 	var ok bool
 	var name string
@@ -180,11 +180,11 @@ func XImportModuleLevelObject(nameObj, given_globals, locals, given_fromlist Obj
 	// PyObject_CallMethodObjArgs() truncate the parameter list because of a
 	// nil argument.
 	if given_globals == nil {
-		globals = StringDict{}
+		globals = Dict{}
 	} else {
 		// Only have to care what given_globals is if it will be used
 		// for something.
-		globals, ok = given_globals.(StringDict)
+		globals, ok = given_globals.(Dict)
 		if level > 0 && !ok {
 			return nil, ExceptionNewf(TypeError, "globals must be a dict")
 		}
@@ -214,14 +214,14 @@ func XImportModuleLevelObject(nameObj, given_globals, locals, given_fromlist Obj
 	if level < 0 {
 		return nil, ExceptionNewf(ValueError, "level must be >= 0")
 	} else if level > 0 {
-		PackageObj, ok = globals["__package__"]
+		PackageObj, ok = globals[String("__package__")]
 		if ok && PackageObj != None {
 			if _, ok = PackageObj.(String); !ok {
 				return nil, ExceptionNewf(TypeError, "package must be a string")
 			}
 			Package = string(PackageObj.(String))
 		} else {
-			PackageObj, ok = globals["__name__"]
+			PackageObj, ok = globals[String("__name__")]
 			if !ok {
 				return nil, ExceptionNewf(KeyError, "'__name__' not in globals")
 			} else if _, ok = PackageObj.(String); !ok {
@@ -229,7 +229,7 @@ func XImportModuleLevelObject(nameObj, given_globals, locals, given_fromlist Obj
 			}
 			Package = string(PackageObj.(String))
 
-			if _, ok = globals["__path__"]; !ok {
+			if _, ok = globals[String("__path__")]; !ok {
 				i := strings.LastIndex(string(Package), ".")
 				if i < 0 {
 					Package = ""
@@ -275,9 +275,9 @@ func XImportModuleLevelObject(nameObj, given_globals, locals, given_fromlist Obj
 	// FIXME _PyImport_AcquireLock()
 
 	// From this point forward, goto error_with_unlock!
-	builtins_import, ok = globals["__import__"]
+	builtins_import, ok = globals[String("__import__")]
 	if !ok {
-		builtins_import, ok = Builtins.Globals["__import__"]
+		builtins_import, ok = Builtins.Globals[String("__import__")]
 		if !ok {
 			return nil, ExceptionNewf(ImportError, "__import__ not found")
 		}
@@ -376,11 +376,11 @@ error:
 }
 
 // The actual import code
-func BuiltinImport(self Object, args Tuple, kwargs StringDict, currentGlobal StringDict) (Object, error) {
+func BuiltinImport(self Object, args Tuple, kwargs Dict, currentGlobal Dict) (Object, error) {
 	kwlist := []string{"name", "globals", "locals", "fromlist", "level"}
 	var name Object
 	var globals Object = currentGlobal
-	var locals Object = NewStringDict()
+	var locals Object = NewDict()
 	var fromlist Object = Tuple{}
 	var level Object = Int(0)
 
@@ -391,5 +391,5 @@ func BuiltinImport(self Object, args Tuple, kwargs StringDict, currentGlobal Str
 	if fromlist == None {
 		fromlist = Tuple{}
 	}
-	return ImportModuleLevelObject(string(name.(String)), globals.(StringDict), locals.(StringDict), fromlist.(Tuple), int(level.(Int)))
+	return ImportModuleLevelObject(string(name.(String)), globals.(Dict), locals.(Dict), fromlist.(Tuple), int(level.(Int)))
 }

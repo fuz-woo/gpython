@@ -123,7 +123,7 @@ func fieldsN(s string, n int) []string {
 }
 
 func init() {
-	StringType.Dict["split"] = MustNewMethod("split", func(self Object, args Tuple) (Object, error) {
+	StringType.Dict[String("split")] = MustNewMethod("split", func(self Object, args Tuple) (Object, error) {
 		selfStr := self.(String)
 		var value Object = None
 		zeroRemove := true
@@ -156,7 +156,7 @@ func init() {
 		return &o, nil
 	}, 0, "split(sub) -> split string with sub.")
 
-	StringType.Dict["startswith"] = MustNewMethod("startswith", func(self Object, args Tuple) (Object, error) {
+	StringType.Dict[String("startswith")] = MustNewMethod("startswith", func(self Object, args Tuple) (Object, error) {
 		selfStr := string(self.(String))
 		prefix := []string{}
 		if len(args) > 0 {
@@ -188,7 +188,7 @@ func init() {
 		return Bool(false), nil
 	}, 0, "startswith(prefix[, start[, end]]) -> bool")
 
-	StringType.Dict["endswith"] = MustNewMethod("endswith", func(self Object, args Tuple) (Object, error) {
+	StringType.Dict[String("endswith")] = MustNewMethod("endswith", func(self Object, args Tuple) (Object, error) {
 		selfStr := string(self.(String))
 		suffix := []string{}
 		if len(args) > 0 {
@@ -222,7 +222,7 @@ func (s String) Type() *Type {
 }
 
 // StrNew
-func StrNew(metatype *Type, args Tuple, kwargs StringDict) (Object, error) {
+func StrNew(metatype *Type, args Tuple, kwargs Dict) (Object, error) {
 	var (
 		sObj     Object = String("")
 		encoding Object

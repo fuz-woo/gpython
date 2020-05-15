@@ -296,7 +296,7 @@ func (rfile *rFile) ReadObject() (obj py.Object, err error) {
 		return updateRef(iref, py.Tuple(tuple)), nil
 	case TYPE_DICT:
 		// FIXME should be py.Dict
-		dict := py.NewStringDict()
+		dict := py.NewDict()
 		iref := reserveRef()
 		var key, value py.Object
 		for {
@@ -313,7 +313,7 @@ func (rfile *rFile) ReadObject() (obj py.Object, err error) {
 			}
 			if value != nil {
 				// FIXME should be objects as key
-				dict[string(key.(py.String))] = value
+				dict[key.(py.String)] = value
 			}
 		}
 		return updateRef(iref, dict), nil
@@ -631,8 +631,8 @@ func init() {
 		py.MustNewMethod("dumps", marshal_dumps, 0, dumps_doc),
 		py.MustNewMethod("loads", marshal_loads, 0, loads_doc),
 	}
-	globals := py.StringDict{
-		"version": py.Int(MARSHAL_VERSION),
+	globals := py.Dict{
+		py.String("version"): py.Int(MARSHAL_VERSION),
 	}
 	py.NewModule("marshal", module_doc, methods, globals)
 }

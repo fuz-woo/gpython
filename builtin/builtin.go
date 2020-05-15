@@ -64,103 +64,103 @@ func init() {
 		py.MustNewMethod("sum", builtin_sum, 0, sum_doc),
 		// py.MustNewMethod("vars", builtin_vars, 0, vars_doc),
 	}
-	globals := py.StringDict{
-		"None":     py.None,
-		"Ellipsis": py.Ellipsis,
-		"False":    py.False,
-		"True":     py.True,
-		"bool":     py.BoolType,
-		// "memoryview":     py.MemoryViewType,
-		// "bytearray":      py.ByteArrayType,
-		"bytes":       py.BytesType,
-		"classmethod": py.ClassMethodType,
-		"complex":     py.ComplexType,
-		"dict":        py.StringDictType, // FIXME
-		"enumerate":   py.EnumerateType,
-		// "filter":         py.FilterType,
-		"float":     py.FloatType,
-		"frozenset": py.FrozenSetType,
-		// "property":       py.PropertyType,
-		"int":  py.IntType, // FIXME LongType?
-		"list": py.ListType,
-		// "map":            py.MapType,
-		"object": py.ObjectType,
-		"range":  py.RangeType,
-		// "reversed":       py.ReversedType,
-		"set":          py.SetType,
-		"slice":        py.SliceType,
-		"staticmethod": py.StaticMethodType,
-		"str":          py.StringType,
-		// "super":          py.SuperType,
-		"tuple": py.TupleType,
-		"type":  py.TypeType,
-		"zip":   py.ZipType,
+	globals := py.Dict{
+		py.String("None"):     py.None,
+		py.String("Ellipsis"): py.Ellipsis,
+		py.String("False"):    py.False,
+		py.String("True"):     py.True,
+		py.String("bool"):     py.BoolType,
+		// py.String("memoryview"):     py.MemoryViewType,
+		// py.String("bytearray"):      py.ByteArrayType,
+		py.String("bytes"):       py.BytesType,
+		py.String("classmethod"): py.ClassMethodType,
+		py.String("complex"):     py.ComplexType,
+		py.String("dict"):        py.DictType, // FIXME
+		py.String("enumerate"):   py.EnumerateType,
+		// py.String("filter"):         py.FilterType,
+		py.String("float"):     py.FloatType,
+		py.String("frozenset"): py.FrozenSetType,
+		// py.String("property"):       py.PropertyType,
+		py.String("int"):  py.IntType, // FIXME LongType?
+		py.String("list"): py.ListType,
+		// py.String("map"):            py.MapType,
+		py.String("object"): py.ObjectType,
+		py.String("range"):  py.RangeType,
+		// py.String("reversed"):       py.ReversedType,
+		py.String("set"):          py.SetType,
+		py.String("slice"):        py.SliceType,
+		py.String("staticmethod"): py.StaticMethodType,
+		py.String("str"):          py.StringType,
+		// py.String("super"):          py.SuperType,
+		py.String("tuple"): py.TupleType,
+		py.String("type"):  py.TypeType,
+		py.String("zip"):   py.ZipType,
 
 		// Exceptions
-		"ArithmeticError":           py.ArithmeticError,
-		"AssertionError":            py.AssertionError,
-		"AttributeError":            py.AttributeError,
-		"BaseException":             py.BaseException,
-		"BlockingIOError":           py.BlockingIOError,
-		"BrokenPipeError":           py.BrokenPipeError,
-		"BufferError":               py.BufferError,
-		"BytesWarning":              py.BytesWarning,
-		"ChildProcessError":         py.ChildProcessError,
-		"ConnectionAbortedError":    py.ConnectionAbortedError,
-		"ConnectionError":           py.ConnectionError,
-		"ConnectionRefusedError":    py.ConnectionRefusedError,
-		"ConnectionResetError":      py.ConnectionResetError,
-		"DeprecationWarning":        py.DeprecationWarning,
-		"EOFError":                  py.EOFError,
-		"EnvironmentError":          py.OSError,
-		"Exception":                 py.ExceptionType,
-		"FileExistsError":           py.FileExistsError,
-		"FileNotFoundError":         py.FileNotFoundError,
-		"FloatingPointError":        py.FloatingPointError,
-		"FutureWarning":             py.FutureWarning,
-		"GeneratorExit":             py.GeneratorExit,
-		"IOError":                   py.OSError,
-		"ImportError":               py.ImportError,
-		"ImportWarning":             py.ImportWarning,
-		"IndentationError":          py.IndentationError,
-		"IndexError":                py.IndexError,
-		"InterruptedError":          py.InterruptedError,
-		"IsADirectoryError":         py.IsADirectoryError,
-		"KeyError":                  py.KeyError,
-		"KeyboardInterrupt":         py.KeyboardInterrupt,
-		"LookupError":               py.LookupError,
-		"MemoryError":               py.MemoryError,
-		"NameError":                 py.NameError,
-		"NotADirectoryError":        py.NotADirectoryError,
-		"NotImplemented":            py.NotImplemented,
-		"NotImplementedError":       py.NotImplementedError,
-		"OSError":                   py.OSError,
-		"OverflowError":             py.OverflowError,
-		"PendingDeprecationWarning": py.PendingDeprecationWarning,
-		"PermissionError":           py.PermissionError,
-		"ProcessLookupError":        py.ProcessLookupError,
-		"ReferenceError":            py.ReferenceError,
-		"ResourceWarning":           py.ResourceWarning,
-		"RuntimeError":              py.RuntimeError,
-		"RuntimeWarning":            py.RuntimeWarning,
-		"StopIteration":             py.StopIteration,
-		"SyntaxError":               py.SyntaxError,
-		"SyntaxWarning":             py.SyntaxWarning,
-		"SystemError":               py.SystemError,
-		"SystemExit":                py.SystemExit,
-		"TabError":                  py.TabError,
-		"TimeoutError":              py.TimeoutError,
-		"TypeError":                 py.TypeError,
-		"UnboundLocalError":         py.UnboundLocalError,
-		"UnicodeDecodeError":        py.UnicodeDecodeError,
-		"UnicodeEncodeError":        py.UnicodeEncodeError,
-		"UnicodeError":              py.UnicodeError,
-		"UnicodeTranslateError":     py.UnicodeTranslateError,
-		"UnicodeWarning":            py.UnicodeWarning,
-		"UserWarning":               py.UserWarning,
-		"ValueError":                py.ValueError,
-		"Warning":                   py.Warning,
-		"ZeroDivisionError":         py.ZeroDivisionError,
+		py.String("ArithmeticError"):           py.ArithmeticError,
+		py.String("AssertionError"):            py.AssertionError,
+		py.String("AttributeError"):            py.AttributeError,
+		py.String("BaseException"):             py.BaseException,
+		py.String("BlockingIOError"):           py.BlockingIOError,
+		py.String("BrokenPipeError"):           py.BrokenPipeError,
+		py.String("BufferError"):               py.BufferError,
+		py.String("BytesWarning"):              py.BytesWarning,
+		py.String("ChildProcessError"):         py.ChildProcessError,
+		py.String("ConnectionAbortedError"):    py.ConnectionAbortedError,
+		py.String("ConnectionError"):           py.ConnectionError,
+		py.String("ConnectionRefusedError"):    py.ConnectionRefusedError,
+		py.String("ConnectionResetError"):      py.ConnectionResetError,
+		py.String("DeprecationWarning"):        py.DeprecationWarning,
+		py.String("EOFError"):                  py.EOFError,
+		py.String("EnvironmentError"):          py.OSError,
+		py.String("Exception"):                 py.ExceptionType,
+		py.String("FileExistsError"):           py.FileExistsError,
+		py.String("FileNotFoundError"):         py.FileNotFoundError,
+		py.String("FloatingPointError"):        py.FloatingPointError,
+		py.String("FutureWarning"):             py.FutureWarning,
+		py.String("GeneratorExit"):             py.GeneratorExit,
+		py.String("IOError"):                   py.OSError,
+		py.String("ImportError"):               py.ImportError,
+		py.String("ImportWarning"):             py.ImportWarning,
+		py.String("IndentationError"):          py.IndentationError,
+		py.String("IndexError"):                py.IndexError,
+		py.String("InterruptedError"):          py.InterruptedError,
+		py.String("IsADirectoryError"):         py.IsADirectoryError,
+		py.String("KeyError"):                  py.KeyError,
+		py.String("KeyboardInterrupt"):         py.KeyboardInterrupt,
+		py.String("LookupError"):               py.LookupError,
+		py.String("MemoryError"):               py.MemoryError,
+		py.String("NameError"):                 py.NameError,
+		py.String("NotADirectoryError"):        py.NotADirectoryError,
+		py.String("NotImplemented"):            py.NotImplemented,
+		py.String("NotImplementedError"):       py.NotImplementedError,
+		py.String("OSError"):                   py.OSError,
+		py.String("OverflowError"):             py.OverflowError,
+		py.String("PendingDeprecationWarning"): py.PendingDeprecationWarning,
+		py.String("PermissionError"):           py.PermissionError,
+		py.String("ProcessLookupError"):        py.ProcessLookupError,
+		py.String("ReferenceError"):            py.ReferenceError,
+		py.String("ResourceWarning"):           py.ResourceWarning,
+		py.String("RuntimeError"):              py.RuntimeError,
+		py.String("RuntimeWarning"):            py.RuntimeWarning,
+		py.String("StopIteration"):             py.StopIteration,
+		py.String("SyntaxError"):               py.SyntaxError,
+		py.String("SyntaxWarning"):             py.SyntaxWarning,
+		py.String("SystemError"):               py.SystemError,
+		py.String("SystemExit"):                py.SystemExit,
+		py.String("TabError"):                  py.TabError,
+		py.String("TimeoutError"):              py.TimeoutError,
+		py.String("TypeError"):                 py.TypeError,
+		py.String("UnboundLocalError"):         py.UnboundLocalError,
+		py.String("UnicodeDecodeError"):        py.UnicodeDecodeError,
+		py.String("UnicodeEncodeError"):        py.UnicodeEncodeError,
+		py.String("UnicodeError"):              py.UnicodeError,
+		py.String("UnicodeTranslateError"):     py.UnicodeTranslateError,
+		py.String("UnicodeWarning"):            py.UnicodeWarning,
+		py.String("UserWarning"):               py.UserWarning,
+		py.String("ValueError"):                py.ValueError,
+		py.String("Warning"):                   py.Warning,
+		py.String("ZeroDivisionError"):         py.ZeroDivisionError,
 	}
 	py.NewModule("builtins", builtin_doc, methods, globals)
 }
@@ -174,11 +174,11 @@ sep:   string inserted between values, default a space.
 end:   string appended after the last value, default a newline.
 flush: whether to forcibly flush the stream.`
 
-func builtin_print(self py.Object, args py.Tuple, kwargs py.StringDict) (py.Object, error) {
+func builtin_print(self py.Object, args py.Tuple, kwargs py.Dict) (py.Object, error) {
 	var (
 		sepObj py.Object = py.String(" ")
 		endObj py.Object = py.String("\n")
-		file   py.Object = py.MustGetModule("sys").Globals["stdout"]
+		file   py.Object = py.MustGetModule("sys").Globals[py.String("stdout")]
 		flush  py.Object
 	)
 	kwlist := []string{"sep", "end", "file", "flush"}
@@ -358,7 +358,7 @@ Round a number to a given precision in decimal digits (default 0 digits).
 This returns an int when called with one argument, otherwise the
 same type as the number. ndigits may be negative.`
 
-func builtin_round(self py.Object, args py.Tuple, kwargs py.StringDict) (py.Object, error) {
+func builtin_round(self py.Object, args py.Tuple, kwargs py.Dict) (py.Object, error) {
 	var number, ndigits py.Object
 	ndigits = py.Int(0)
 	// var kwlist = []string{"number", "ndigits"}
@@ -380,10 +380,10 @@ const build_class_doc = `__build_class__(func, name, *bases, metaclass=None, **k
 
 Internal helper function used by the class statement.`
 
-func builtin___build_class__(self py.Object, args py.Tuple, kwargs py.StringDict) (py.Object, error) {
+func builtin___build_class__(self py.Object, args py.Tuple, kwargs py.Dict) (py.Object, error) {
 	// fmt.Printf("__build_class__(self=%#v, args=%#v, kwargs=%#v\n", self, args, kwargs)
 	var prep, cell, cls py.Object
-	var mkw, ns py.StringDict
+	var mkw, ns py.Dict
 	var meta, winner *py.Type
 	var isclass bool
 	var err error
@@ -406,9 +406,9 @@ func builtin___build_class__(self py.Object, args py.Tuple, kwargs py.StringDict
 
 	if kwargs != nil {
 		mkw = kwargs.Copy()      // Don't modify kwds passed in!
-		meta := mkw["metaclass"] // _PyDict_GetItemId(mkw, &PyId_metaclass)
+		meta := mkw[py.String("metaclass")] // _PyDict_GetItemId(mkw, &PyId_metaclass)
 		if meta != nil {
-			delete(mkw, "metaclass")
+			delete(mkw, py.String("metaclass"))
 			// metaclass is explicitly given, check if it's indeed a class
 			_, isclass = meta.(*py.Type)
 		}
@@ -437,15 +437,15 @@ func builtin___build_class__(self py.Object, args py.Tuple, kwargs py.StringDict
 	}
 	// else: meta is not a class, so we cannot do the metaclass
 	// calculation, so we will use the explicitly given object as it is
-	prep = meta.Type().Dict["___prepare__"] // FIXME should be using _PyObject_GetAttr
+	prep = meta.Type().Dict[py.String("___prepare__")] // FIXME should be using _PyObject_GetAttr
 	if prep == nil {
-		ns = py.NewStringDict()
+		ns = py.NewDict()
 	} else {
 		nsObj, err := py.Call(prep, py.Tuple{name, bases}, mkw)
 		if err != nil {
 			return nil, err
 		}
-		ns = nsObj.(py.StringDict)
+		ns = nsObj.(py.Dict)
 	}
 	// fmt.Printf("Calling %v with %v and %v\n", fn.Name, fn.Globals, ns)
 	// fmt.Printf("Code = %#v\n", fn.Code)
@@ -514,7 +514,7 @@ const open_doc = `open(name[, mode[, buffering]]) -> file object
 Open a file using the file() type, returns a file object.  This is the
 preferred way to open a file.  See file.__doc__ for further information.`
 
-func builtin_open(self py.Object, args py.Tuple, kwargs py.StringDict) (py.Object, error) {
+func builtin_open(self py.Object, args py.Tuple, kwargs py.Dict) (py.Object, error) {
 	kwlist := []string{
 		"file",
 		"mode",
@@ -711,7 +711,7 @@ the effects of any future statements in effect in the code calling
 compile; if absent or zero these statements do influence the compilation,
 in addition to any features explicitly specified.`
 
-func builtin_compile(self py.Object, args py.Tuple, kwargs py.StringDict) (py.Object, error) {
+func builtin_compile(self py.Object, args py.Tuple, kwargs py.Dict) (py.Object, error) {
 	// FIXME lots of unsupported stuff here!
 	var filename py.Object
 	var startstr py.Object
@@ -963,7 +963,7 @@ default keyword-only argument specifies an object to return if
 the provided iterable is empty.
 With two or more arguments, return the largest argument.`
 
-func builtin_max(self py.Object, args py.Tuple, kwargs py.StringDict) (py.Object, error) {
+func builtin_max(self py.Object, args py.Tuple, kwargs py.Dict) (py.Object, error) {
 	return min_max(args, kwargs, "max")
 }
 
@@ -976,11 +976,11 @@ default keyword-only argument specifies an object to return if
 the provided iterable is empty.
 With two or more arguments, return the smallest argument.`
 
-func builtin_min(self py.Object, args py.Tuple, kwargs py.StringDict) (py.Object, error) {
+func builtin_min(self py.Object, args py.Tuple, kwargs py.Dict) (py.Object, error) {
 	return min_max(args, kwargs, "min")
 }
 
-func min_max(args py.Tuple, kwargs py.StringDict, name string) (py.Object, error) {
+func min_max(args py.Tuple, kwargs py.Dict, name string) (py.Object, error) {
 	kwlist := []string{"key", "default"}
 	positional := len(args)
 	var format string
@@ -1167,7 +1167,7 @@ Return a new list containing all items from the iterable in ascending order.
 A custom key function can be supplied to customize the sort order, and the
 reverse flag can be set to request the result in descending order.`
 
-func builtin_sorted(self py.Object, args py.Tuple, kwargs py.StringDict) (py.Object, error) {
+func builtin_sorted(self py.Object, args py.Tuple, kwargs py.Dict) (py.Object, error) {
 	const funcName = "sorted"
 	var iterable py.Object
 	err := py.UnpackTuple(args, nil, funcName, 1, 1, &iterable)

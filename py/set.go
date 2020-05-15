@@ -52,7 +52,7 @@ func (s *Set) Add(item Object) {
 }
 
 // SetNew
-func SetNew(metatype *Type, args Tuple, kwargs StringDict) (Object, error) {
+func SetNew(metatype *Type, args Tuple, kwargs Dict) (Object, error) {
 	var iterable Object
 	err := UnpackTuple(args, kwargs, "set", 0, 1, &iterable)
 	if err != nil {

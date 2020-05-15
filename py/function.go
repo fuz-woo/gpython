@@ -17,18 +17,18 @@ package py
 
 // A python Function object
 type Function struct {
-	Code        *Code      // A code object, the __code__ attribute
-	Globals     StringDict // A dictionary (other mappings won't do)
-	Defaults    Tuple      // NULL or a tuple
-	KwDefaults  StringDict // NULL or a dict
-	Closure     Tuple      // NULL or a tuple of cell objects
-	Doc         Object     // The __doc__ attribute, can be anything
-	Name        string     // The __name__ attribute, a string object
-	Dict        StringDict // The __dict__ attribute, a dict or NULL
-	Weakreflist List       // List of weak references
-	Module      Object     // The __module__ attribute, can be anything
-	Annotations StringDict // Annotations, a dict or NULL
-	Qualname    string     // The qualified name
+	Code        *Code  // A code object, the __code__ attribute
+	Globals     Dict   // A dictionary (other mappings won't do)
+	Defaults    Tuple  // NULL or a tuple
+	KwDefaults  Dict   // NULL or a dict
+	Closure     Tuple  // NULL or a tuple of cell objects
+	Doc         Object // The __doc__ attribute, can be anything
+	Name        string // The __name__ attribute, a string object
+	Dict        Dict   // The __dict__ attribute, a dict or NULL
+	Weakreflist List   // List of weak references
+	Module      Object // The __module__ attribute, can be anything
+	Annotations Dict   // Annotations, a dict or NULL
+	Qualname    string // The qualified name
 }
 
 var FunctionType = NewType("function", "A python function")
@@ -38,8 +38,12 @@ func (o *Function) Type() *Type {
 	return FunctionType
 }
 
+func (o *Function) String() string {
+	return "function "+o.Name+"()"
+}
+
 // Get the Dict
-func (f *Function) GetDict() StringDict {
+func (f *Function) GetDict() Dict {
 	return f.Dict
 }
 
@@ -56,7 +60,7 @@ func (f *Function) GetDict() StringDict {
 // attribute. qualname should be a unicode object or ""; if "", the
 // __qualname__ attribute is set to the same value as its __name__
 // attribute.
-func NewFunction(code *Code, globals StringDict, qualname string) *Function {
+func NewFunction(code *Code, globals Dict, qualname string) *Function {
 	var doc Object
 	var module Object = None
 	if len(code.Consts) >= 1 {
@@ -69,7 +73,7 @@ func NewFunction(code *Code, globals StringDict, qualname string) *Function {
 	}
 
 	// __module__: If module name is in globals, use it. Otherwise, use None.
-	if moduleobj, ok := globals["__name__"]; ok {
+	if moduleobj, ok := globals[String("__name__")]; ok {
 		module = moduleobj
 	}
 
@@ -84,13 +88,13 @@ func NewFunction(code *Code, globals StringDict, qualname string) *Function {
 		Name:     code.Name,
 		Doc:      doc,
 		Module:   module,
-		Dict:     make(StringDict),
+		Dict:     make(Dict),
 	}
 }
 
 // Call a function
-func (f *Function) M__call__(args Tuple, kwargs StringDict) (Object, error) {
-	result, err := VmEvalCodeEx(f.Code, f.Globals, NewStringDict(), args, kwargs, f.Defaults, f.KwDefaults, f.Closure)
+func (f *Function) M__call__(args Tuple, kwargs Dict) (Object, error) {
+	result, err := VmEvalCodeEx(f.Code, f.Globals, NewDict(), args, kwargs, f.Defaults, f.KwDefaults, f.Closure)
 	if err != nil {
 		return nil, err
 	}
@@ -107,7 +111,7 @@ func (f *Function) M__get__(instance, owner Object) (Object, error) {
 
 // Properties
 func init() {
-	FunctionType.Dict["__code__"] = &Property{
+	FunctionType.Dict[String("__code__")] = &Property{
 		Fget: func(self Object) (Object, error) {
 			return self.(*Function).Code, nil
 		},
@@ -127,7 +131,7 @@ func init() {
 			return nil
 		},
 	}
-	FunctionType.Dict["__defaults__"] = &Property{
+	FunctionType.Dict[String("__defaults__")] = &Property{
 		Fget: func(self Object) (Object, error) {
 			return self.(*Function).Defaults, nil
 		},
@@ -145,13 +149,13 @@ func init() {
 			return nil
 		},
 	}
-	FunctionType.Dict["__kwdefaults__"] = &Property{
+	FunctionType.Dict[String("__kwdefaults__")] = &Property{
 		Fget: func(self Object) (Object, error) {
 			return self.(*Function).KwDefaults, nil
 		},
 		Fset: func(self, value Object) error {
 			f := self.(*Function)
-			kwdefaults, ok := value.(StringDict)
+			kwdefaults, ok := value.(Dict)
 			if !ok {
 				return ExceptionNewf(TypeError, "__kwdefaults__ must be set to a dict object")
 			}
@@ -163,13 +167,13 @@ func init() {
 			return nil
 		},
 	}
-	FunctionType.Dict["__annotations__"] = &Property{
+	FunctionType.Dict[String("__annotations__")] = &Property{
 		Fget: func(self Object) (Object, error) {
 			return self.(*Function).Annotations, nil
 		},
 		Fset: func(self, value Object) error {
 			f := self.(*Function)
-			annotations, ok := value.(StringDict)
+			annotations, ok := value.(Dict)
 			if !ok {
 				return ExceptionNewf(TypeError, "__annotations__ must be set to a dict object")
 			}
@@ -181,13 +185,13 @@ func init() {
 			return nil
 		},
 	}
-	FunctionType.Dict["__dict__"] = &Property{
+	FunctionType.Dict[String("__dict__")] = &Property{
 		Fget: func(self Object) (Object, error) {
 			return self.(*Function).Dict, nil
 		},
 		Fset: func(self, value Object) error {
 			f := self.(*Function)
-			dict, ok := value.(StringDict)
+			dict, ok := value.(Dict)
 			if !ok {
 				return ExceptionNewf(TypeError, "__dict__ must be set to a dict object")
 			}
@@ -195,7 +199,7 @@ func init() {
 			return nil
 		},
 	}
-	FunctionType.Dict["__name__"] = &Property{
+	FunctionType.Dict[String("__name__")] = &Property{
 		Fget: func(self Object) (Object, error) {
 			return String(self.(*Function).Name), nil
 		},
@@ -209,7 +213,7 @@ func init() {
 			return nil
 		},
 	}
-	FunctionType.Dict["__qualname__"] = &Property{
+	FunctionType.Dict[String("__qualname__")] = &Property{
 		Fget: func(self Object) (Object, error) {
 			return String(self.(*Function).Qualname), nil
 		},

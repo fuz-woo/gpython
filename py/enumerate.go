@@ -34,7 +34,7 @@ func (ei *EnumerateIterator) Type() *Type {
 }
 
 // EnumerateTypeNew
-func EnumerateNew(metatype *Type, args Tuple, kwargs StringDict) (Object, error) {
+func EnumerateNew(metatype *Type, args Tuple, kwargs Dict) (Object, error) {
 	var iterable Object
 	var start Object
 	err := UnpackTuple(args, kwargs, "enumerate", 1, 2, &iterable, &start)

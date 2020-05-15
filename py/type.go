@@ -75,9 +75,9 @@ const (
 	TPFLAGS_DEFAULT = TPFLAGS_HAVE_VERSION_TAG
 )
 
-type NewFunc func(metatype *Type, args Tuple, kwargs StringDict) (Object, error)
+type NewFunc func(metatype *Type, args Tuple, kwargs Dict) (Object, error)
 
-type InitFunc func(self Object, args Tuple, kwargs StringDict) error
+type InitFunc func(self Object, args Tuple, kwargs Dict) error
 
 type Type struct {
 	ObjectType *Type  // Type of this object -- FIXME this is redundant in Base?
@@ -87,7 +87,7 @@ type Type struct {
 	//	Members    StringDict // *PyMemberDef
 	//	Getset     *PyGetSetDef
 	Base *Type
-	Dict StringDict
+	Dict Dict
 	//	Dictoffset int
 	Bases Tuple
 	Mro   Tuple // method resolution order
@@ -182,14 +182,14 @@ type Type struct {
 var TypeType *Type = &Type{
 	Name: "type",
 	Doc:  "type(object) -> the object's type\ntype(name, bases, dict) -> a new type",
-	Dict: StringDict{},
+	Dict: Dict{},
 }
 
 var ObjectType = &Type{
 	Name:  "object",
 	Doc:   "The most base type",
 	Flags: TPFLAGS_BASETYPE,
-	Dict:  StringDict{},
+	Dict:  Dict{},
 }
 
 func init() {
@@ -221,7 +221,7 @@ func (t *Type) Error() string {
 }
 
 // Get the Dict
-func (t *Type) GetDict() StringDict {
+func (t *Type) GetDict() Dict {
 	return t.Dict
 }
 
@@ -262,7 +262,7 @@ func NewType(Name string, Doc string) *Type {
 		ObjectType: TypeType,
 		Name:       Name,
 		Doc:        Doc,
-		Dict:       StringDict{},
+		Dict:       Dict{},
 	}
 	TypeDelayReady(t)
 	return t
@@ -278,7 +278,7 @@ func NewTypeX(Name string, Doc string, New NewFunc, Init InitFunc) *Type {
 		Doc:        Doc,
 		New:        New,
 		Init:       Init,
-		Dict:       StringDict{},
+		Dict:       Dict{},
 	}
 	TypeDelayReady(t)
 	return t
@@ -303,7 +303,7 @@ func (t *Type) NewTypeFlags(Name string, Doc string, New NewFunc, Init InitFunc,
 		New:        New,
 		Init:       Init,
 		Flags:      Flags,
-		Dict:       StringDict{},
+		Dict:       Dict{},
 		Bases:      Tuple{t},
 	}
 	TypeDelayReady(t)
@@ -372,7 +372,7 @@ func (a *Type) IsSubtype(b *Type) bool {
 }
 
 // Call type()
-func (t *Type) M__call__(args Tuple, kwargs StringDict) (Object, error) {
+func (t *Type) M__call__(args Tuple, kwargs Dict) (Object, error) {
 	if t.New == nil {
 		return nil, ExceptionNewf(TypeError, "cannot create '%s' instances", t.Name)
 	}
@@ -435,7 +435,7 @@ func (t *Type) Lookup(name string) Object {
 	for _, baseObj := range mro {
 		base := baseObj.(*Type)
 		var ok bool
-		res, ok = base.Dict[name]
+		res, ok = base.Dict[String(name)]
 		if ok {
 			break
 		}
@@ -467,7 +467,7 @@ func (t *Type) Lookup(name string) Object {
 // See _PyObject_GenericGetAttrWithDict in object.c
 func (t *Type) NativeGetAttrOrNil(name string) Object {
 	// Look in type Dict
-	if res, ok := t.Dict[name]; ok {
+	if res, ok := t.Dict[String(name)]; ok {
 		return res
 	}
 	// Now look through base classes etc
@@ -485,11 +485,11 @@ func (t *Type) NativeGetAttrOrNil(name string) Object {
 // See _PyObject_GenericGetAttrWithDict in object.c
 func (t *Type) GetAttrOrNil(name string) Object {
 	// Look in instance dictionary first
-	if res, ok := t.Dict[name]; ok {
+	if res, ok := t.Dict[String(name)]; ok {
 		return res
 	}
 	// Then look in type Dict
-	if res, ok := t.Type().Dict[name]; ok {
+	if res, ok := t.Type().Dict[String(name)]; ok {
 		return res
 	}
 	// Now look through base classes etc
@@ -503,7 +503,7 @@ func (t *Type) GetAttrOrNil(name string) Object {
 // If method found returns (object, true, err)
 //
 // May raise exceptions if calling the method failed
-func (t *Type) CallMethod(name string, args Tuple, kwargs StringDict) (Object, bool, error) {
+func (t *Type) CallMethod(name string, args Tuple, kwargs Dict) (Object, bool, error) {
 	fn := t.GetAttrOrNil(name) // FIXME this should use py.GetAttrOrNil?
 	if fn == nil {
 		return nil, false, nil
@@ -519,7 +519,7 @@ func (t *Type) CallMethod(name string, args Tuple, kwargs StringDict) (Object, b
 // Otherwise returns (object, true, err)
 //
 // May raise exceptions if calling the method fails
-func TypeCall(self Object, name string, args Tuple, kwargs StringDict) (Object, bool, error) {
+func TypeCall(self Object, name string, args Tuple, kwargs Dict) (Object, bool, error) {
 	t, ok := self.(*Type)
 	if !ok {
 		return nil, false, nil
@@ -1041,7 +1041,7 @@ func (t *Type) Ready() error {
 	// Initialize tp_dict
 	dict := t.Dict
 	if dict == nil {
-		dict = NewStringDict()
+		dict = NewDict()
 		t.Dict = dict
 	}
 
@@ -1092,11 +1092,11 @@ func (t *Type) Ready() error {
 
 	// if the type dictionary doesn't contain a __doc__, set it from
 	// the tp_doc slot.
-	if _, ok := t.Dict["__doc__"]; ok {
+	if _, ok := t.Dict[String("__doc__")]; ok {
 		if t.Doc != "" {
-			t.Dict["__doc__"] = String(t.Doc)
+			t.Dict[String("__doc__")] = String(t.Doc)
 		} else {
-			t.Dict["__doc__"] = None
+			t.Dict[String("__doc__")] = None
 		}
 	}
 
@@ -1205,13 +1205,13 @@ func (t *Type) Alloc() *Type {
 	obj := &Type{
 		ObjectType: t,
 		Base:       t,
-		Dict:       StringDict{},
+		Dict:       Dict{},
 	}
 	return obj
 }
 
 // Create a new type
-func TypeNew(metatype *Type, args Tuple, kwargs StringDict) (Object, error) {
+func TypeNew(metatype *Type, args Tuple, kwargs Dict) (Object, error) {
 	// fmt.Printf("TypeNew(type=%q, args=%v, kwargs=%v\n", metatype.Name, args, kwargs)
 	var nameObj, basesObj, orig_dictObj Object
 	var new_type, base, winner *Type
@@ -1243,7 +1243,7 @@ func TypeNew(metatype *Type, args Tuple, kwargs StringDict) (Object, error) {
 	}
 	name := nameObj.(String)
 	bases := basesObj.(Tuple)
-	orig_dict := orig_dictObj.(StringDict)
+	orig_dict := orig_dictObj.(Dict)
 
 	// Determine the proper metatype to deal with this:
 	winner, err = metatype.CalculateMetaclass(bases)
@@ -1277,7 +1277,7 @@ func TypeNew(metatype *Type, args Tuple, kwargs StringDict) (Object, error) {
 	dict := orig_dict.Copy()
 
 	// Check for a __slots__ sequence variable in dict, and count it
-	slots, haveSlots := dict["__slots__"]
+	slots, haveSlots := dict[String("__slots__")]
 	nslots := 0
 	// add_dict := 0
 	// add_weak := 0
@@ -1432,7 +1432,7 @@ func TypeNew(metatype *Type, args Tuple, kwargs StringDict) (Object, error) {
 	// fmt.Printf("New type dict is %v\n", dict)
 
 	// Set __module__ in the dict
-	if _, ok := dict["__module__"]; !ok {
+	if _, ok := dict[String("__module__")]; !ok {
 		fmt.Printf("*** FIXME need to get the current vm globals somehow\n")
 		// tmp = PyEval_GetGlobals()
 		// if tmp != nil {
@@ -1445,13 +1445,13 @@ func TypeNew(metatype *Type, args Tuple, kwargs StringDict) (Object, error) {
 
 	// Set ht_qualname to dict['__qualname__'] if available, else to
 	// __name__.  The __qualname__ accessor will look for ht_qualname.
-	if qualname, ok := dict["__qualname__"]; ok {
+	if qualname, ok := dict[String("__qualname__")]; ok {
 		if Qualname, ok := qualname.(String); !ok {
 			return nil, ExceptionNewf(TypeError, "type __qualname__ must be a str, not %s", qualname.Type().Name)
 		} else {
 			et.Qualname = string(Qualname)
 		}
-		delete(dict, "__qualname__")
+		delete(dict, String("__qualname__"))
 	} else {
 		et.Qualname = et.Name
 	}
@@ -1459,7 +1459,7 @@ func TypeNew(metatype *Type, args Tuple, kwargs StringDict) (Object, error) {
 	// Set tp_doc to a copy of dict['__doc__'], if the latter is there
 	// and is a string.  The __doc__ accessor will first look for tp_doc;
 	// if that fails, it will still look into __dict__.
-	if doc, ok := dict["__doc__"]; ok {
+	if doc, ok := dict[String("__doc__")]; ok {
 		if Doc, ok := doc.(String); ok {
 			new_type.Doc = string(Doc)
 		}
@@ -1564,7 +1564,7 @@ func TypeNew(metatype *Type, args Tuple, kwargs StringDict) (Object, error) {
 	return new_type, nil
 }
 
-func TypeInit(cls Object, args Tuple, kwargs StringDict) error {
+func TypeInit(cls Object, args Tuple, kwargs Dict) error {
 	if len(kwargs) != 0 {
 		return ExceptionNewf(TypeError, "type.__init__() takes no keyword arguments")
 	}
@@ -1619,11 +1619,11 @@ func TypeInit(cls Object, args Tuple, kwargs StringDict) error {
 // rules.
 
 // Return true if any arguments supplied
-func excess_args(args Tuple, kwargs StringDict) bool {
+func excess_args(args Tuple, kwargs Dict) bool {
 	return len(args) != 0 || len(kwargs) != 0
 }
 
-func ObjectInit(self Object, args Tuple, kwargs StringDict) error {
+func ObjectInit(self Object, args Tuple, kwargs Dict) error {
 	t := self.Type()
 	// FIXME bodge to compare function pointers
 	// if excess_args(args, kwargs) && (fmt.Sprintf("%p", t.New) == fmt.Sprintf("%p", ObjectNew) || fmt.Sprintf("%p", t.Init) != fmt.Sprintf("%p", ObjectInit)) {
@@ -1655,7 +1655,7 @@ func ObjectInit(self Object, args Tuple, kwargs StringDict) error {
 	return nil
 }
 
-func ObjectNew(t *Type, args Tuple, kwargs StringDict) (Object, error) {
+func ObjectNew(t *Type, args Tuple, kwargs Dict) (Object, error) {
 	// FIXME bodge to compare function pointers
 	// if excess_args(args, kwargs) && (fmt.Sprintf("%p", t.Init) == fmt.Sprintf("%p", ObjectInit) || fmt.Sprintf("%p", t.New) != fmt.Sprintf("%p", ObjectNew)) {
 	// 	return ExceptionNewf(TypeError, "object() takes no parameters")

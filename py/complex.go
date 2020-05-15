@@ -22,7 +22,7 @@ func (o Complex) Type() *Type {
 }
 
 // ComplexNew
-func ComplexNew(metatype *Type, args Tuple, kwargs StringDict) (Object, error) {
+func ComplexNew(metatype *Type, args Tuple, kwargs Dict) (Object, error) {
 	var realObj Object = Float(0)
 	var imagObj Object = Float(0)
 	err := ParseTupleAndKeywords(args, kwargs, "|OO", []string{"real", "imag"}, &realObj, &imagObj)
@@ -297,17 +297,17 @@ func (a Complex) M__ge__(other Object) (Object, error) {
 
 // Properties
 func init() {
-	ComplexType.Dict["real"] = &Property{
+	ComplexType.Dict[String("real")] = &Property{
 		Fget: func(self Object) (Object, error) {
 			return Float(real(self.(Complex))), nil
 		},
 	}
-	ComplexType.Dict["imag"] = &Property{
+	ComplexType.Dict[String("imag")] = &Property{
 		Fget: func(self Object) (Object, error) {
 			return Float(imag(self.(Complex))), nil
 		},
 	}
-	ComplexType.Dict["conjugate"] = MustNewMethod("conjugate", func(self Object) (Object, error) {
+	ComplexType.Dict[String("conjugate")] = MustNewMethod("conjugate", func(self Object) (Object, error) {
 		cnj := cmplx.Conj(complex128(self.(Complex)))
 		return Complex(cnj), nil
 	}, 0, "conjugate() -> Returns the complex conjugate.")

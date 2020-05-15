@@ -19,7 +19,7 @@ import (
 type PyCFunction func(self Object, args Tuple) (Object, error)
 
 // Called with self, a tuple of args and a stringdic of kwargs
-type PyCFunctionWithKeywords func(self Object, args Tuple, kwargs StringDict) (Object, error)
+type PyCFunctionWithKeywords func(self Object, args Tuple, kwargs Dict) (Object, error)
 
 // Called with self only
 type PyCFunctionNoArgs func(Object) (Object, error)
@@ -97,7 +97,7 @@ func NewMethod(name string, method interface{}, flags int, doc string) (*Method,
 	// type aliases as they are different types :-(
 	switch method.(type) {
 	case func(self Object, args Tuple) (Object, error):
-	case func(self Object, args Tuple, kwargs StringDict) (Object, error):
+	case func(self Object, args Tuple, kwargs Dict) (Object, error):
 	case func(Object) (Object, error):
 	case func(Object, Object) (Object, error):
 	case InternalMethod:
@@ -134,8 +134,8 @@ func (m *Method) Call(self Object, args Tuple) (Object, error) {
 	switch f := m.method.(type) {
 	case func(self Object, args Tuple) (Object, error):
 		return f(self, args)
-	case func(self Object, args Tuple, kwargs StringDict) (Object, error):
-		return f(self, args, NewStringDict())
+	case func(self Object, args Tuple, kwargs Dict) (Object, error):
+		return f(self, args, NewDict())
 	case func(Object) (Object, error):
 		if len(args) != 0 {
 			return nil, ExceptionNewf(TypeError, "%s() takes no arguments (%d given)", m.Name, len(args))
@@ -151,12 +151,12 @@ func (m *Method) Call(self Object, args Tuple) (Object, error) {
 }
 
 // Call the method with the given arguments
-func (m *Method) CallWithKeywords(self Object, args Tuple, kwargs StringDict) (Object, error) {
+func (m *Method) CallWithKeywords(self Object, args Tuple, kwargs Dict) (Object, error) {
 	if len(kwargs) == 0 {
 		return m.Call(self, args)
 	}
 	switch f := m.method.(type) {
-	case func(self Object, args Tuple, kwargs StringDict) (Object, error):
+	case func(self Object, args Tuple, kwargs Dict) (Object, error):
 		return f(self, args, kwargs)
 	case func(self Object, args Tuple) (Object, error),
 		func(Object) (Object, error),
@@ -180,8 +180,8 @@ func newBoundMethod(name string, fn interface{}) (Object, error) {
 			return f(args)
 		}
 	// M__call__(args Tuple, kwargs StringDict) (Object, error)
-	case func(args Tuple, kwargs StringDict) (Object, error):
-		m.method = func(_ Object, args Tuple, kwargs StringDict) (Object, error) {
+	case func(args Tuple, kwargs Dict) (Object, error):
+		m.method = func(_ Object, args Tuple, kwargs Dict) (Object, error) {
 			return f(args, kwargs)
 		}
 	// M__str__() (Object, error)
@@ -230,7 +230,7 @@ func newBoundMethod(name string, fn interface{}) (Object, error) {
 }
 
 // Call a method
-func (m *Method) M__call__(args Tuple, kwargs StringDict) (Object, error) {
+func (m *Method) M__call__(args Tuple, kwargs Dict) (Object, error) {
 	self := None // FIXME should be the module
 	if kwargs != nil {
 		return m.CallWithKeywords(self, args, kwargs)

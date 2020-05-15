@@ -176,7 +176,7 @@ func Not(a Object) (Object, error) {
 // fnObj must be a callable type such as *py.Method or *py.Function
 //
 // The result is returned
-func Call(fn Object, args Tuple, kwargs StringDict) (Object, error) {
+func Call(fn Object, args Tuple, kwargs Dict) (Object, error) {
 	if I, ok := fn.(I__call__); ok {
 		return I.M__call__(args, kwargs)
 	}
@@ -237,7 +237,7 @@ func GetAttrString(self Object, key string) (res Object, err error) {
 	// Look in the instance dictionary if it exists
 	if I, ok := self.(IGetDict); ok {
 		dict := I.GetDict()
-		res, ok = dict[key]
+		res, ok = dict[String(key)]
 		if ok {
 			return res, err
 		}
@@ -302,7 +302,7 @@ func SetAttrString(self Object, key string, value Object) (Object, error) {
 		if dict == nil {
 			return nil, ExceptionNewf(SystemError, "nil Dict in %s", self.Type().Name)
 		}
-		dict[key] = value
+		dict[String(key)] = value
 		return None, nil
 	}
 
@@ -347,8 +347,8 @@ func DeleteAttrString(self Object, key string) error {
 		if dict == nil {
 			return ExceptionNewf(SystemError, "nil Dict in %s", self.Type().Name)
 		}
-		if _, ok := dict[key]; ok {
-			delete(dict, key)
+		if _, ok := dict[String(key)]; ok {
+			delete(dict, String(key))
 			return nil
 		}
 	}

@@ -25,13 +25,13 @@ var GeneratorType = NewType("generator", "generator object")
 
 func init() {
 	// FIXME would like to do this with introspection
-	GeneratorType.Dict["send"] = MustNewMethod("send", func(self Object, value Object) (Object, error) {
+	GeneratorType.Dict[String("send")] = MustNewMethod("send", func(self Object, value Object) (Object, error) {
 		return self.(*Generator).Send(value)
 	}, 0, "send(arg) -> send 'arg' into generator,\nreturn next yielded value or raise StopIteration.")
-	GeneratorType.Dict["throw"] = MustNewMethod("throw", func(self Object, args Tuple, kwargs StringDict) (Object, error) {
+	GeneratorType.Dict[String("throw")] = MustNewMethod("throw", func(self Object, args Tuple, kwargs Dict) (Object, error) {
 		return self.(*Generator).Throw(args, kwargs)
 	}, 0, "throw(typ[,val[,tb]]) -> raise exception in generator,\nreturn next yielded value or raise StopIteration.")
-	GeneratorType.Dict["close"] = MustNewMethod("close", func(self Object) (Object, error) {
+	GeneratorType.Dict[String("close")] = MustNewMethod("close", func(self Object) (Object, error) {
 		return self.(*Generator).Close()
 	}, 0, "close() -> raise GeneratorExit inside generator.")
 }
@@ -116,7 +116,7 @@ func (it *Generator) Send(arg Object) (Object, error) {
 // StopIteration exception is raised. If the generator function does
 // not catch the passed-in exception, or raises a different exception,
 // then that exception propagates to the caller.
-func (it *Generator) Throw(args Tuple, kwargs StringDict) (Object, error) {
+func (it *Generator) Throw(args Tuple, kwargs Dict) (Object, error) {
 	return nil, NotImplementedError
 }
 

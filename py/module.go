@@ -22,7 +22,7 @@ var (
 type Module struct {
 	Name    string
 	Doc     string
-	Globals StringDict
+	Globals Dict
 	//	dict Dict
 }
 
@@ -38,12 +38,12 @@ func (m *Module) M__repr__() (Object, error) {
 }
 
 // Get the Dict
-func (m *Module) GetDict() StringDict {
+func (m *Module) GetDict() Dict {
 	return m.Globals
 }
 
 // Define a new module
-func NewModule(name, doc string, methods []*Method, globals StringDict) *Module {
+func NewModule(name, doc string, methods []*Method, globals Dict) *Module {
 	m := &Module{
 		Name:    name,
 		Doc:     doc,
@@ -51,12 +51,12 @@ func NewModule(name, doc string, methods []*Method, globals StringDict) *Module 
 	}
 	// Insert the methods into the module dictionary
 	for _, method := range methods {
-		m.Globals[method.Name] = method
+		m.Globals[String(method.Name)] = method
 	}
 	// Set some module globals
-	m.Globals["__name__"] = String(name)
-	m.Globals["__doc__"] = String(doc)
-	m.Globals["__package__"] = None
+	m.Globals[String("__name__")] = String(name)
+	m.Globals[String("__doc__")] = String(doc)
+	m.Globals[String("__package__")] = None
 	// Register the module
 	modules[name] = m
 	// Make a note of some modules
@@ -89,7 +89,7 @@ func MustGetModule(name string) *Module {
 }
 
 // Calls a named method of a module
-func (m *Module) Call(name string, args Tuple, kwargs StringDict) (Object, error) {
+func (m *Module) Call(name string, args Tuple, kwargs Dict) (Object, error) {
 	attr, err := GetAttrString(m, name)
 	if err != nil {
 		return nil, err

@@ -461,7 +461,7 @@ func do_PRINT_EXPR(vm *Vm, arg int32) error {
 	// After printing, also assign to '_'
 	// Before, set '_' to None to avoid recursion
 	value := vm.POP()
-	vm.frame.Globals["_"] = py.None
+	vm.frame.Globals[py.String("_")] = py.None
 	if value != py.None {
 		repr, err := py.Repr(value)
 		if err != nil {
@@ -469,7 +469,7 @@ func do_PRINT_EXPR(vm *Vm, arg int32) error {
 		}
 		PrintExpr(fmt.Sprint(repr))
 	}
-	vm.frame.Globals["_"] = value
+	vm.frame.Globals[py.String("_")] = value
 	return nil
 }
 
@@ -649,7 +649,7 @@ func do_IMPORT_STAR(vm *Vm, arg int32) error {
 	vm.frame.FastToLocals()
 	from := vm.POP()
 	module := from.(*py.Module)
-	if all, ok := module.Globals["__all__"]; ok {
+	if all, ok := module.Globals[py.String("__all__")]; ok {
 		var loopErr error
 		iterErr := py.Iterate(all, func(item py.Object) bool {
 			name, err := py.AttributeName(item)
@@ -657,7 +657,7 @@ func do_IMPORT_STAR(vm *Vm, arg int32) error {
 				loopErr = err
 				return true
 			}
-			vm.frame.Locals[name], err = py.GetAttrString(module, name)
+			vm.frame.Locals[py.String(name)], err = py.GetAttrString(module, name)
 			if err != nil {
 				loopErr = err
 				return true
@@ -672,7 +672,7 @@ func do_IMPORT_STAR(vm *Vm, arg int32) error {
 		}
 	} else {
 		for name, value := range module.Globals {
-			if !strings.HasPrefix(name, "_") {
+			if !strings.HasPrefix(string(name.(py.String)), "_") {
 				vm.frame.Locals[name] = value
 			}
 		}
@@ -767,7 +767,7 @@ func do_END_FINALLY(vm *Vm, arg int32) error {
 // Loads the __build_class__ helper function to the stack which
 // creates a new class object.
 func do_LOAD_BUILD_CLASS(vm *Vm, arg int32) error {
-	vm.PUSH(py.Builtins.Globals["__build_class__"])
+	vm.PUSH(py.Builtins.Globals[py.String("__build_class__")])
 	return nil
 }
 
@@ -890,7 +890,7 @@ func do_STORE_NAME(vm *Vm, namei int32) error {
 	if debugging {
 		debugf("STORE_NAME %v\n", vm.frame.Code.Names[namei])
 	}
-	vm.frame.Locals[vm.frame.Code.Names[namei]] = vm.POP()
+	vm.frame.Locals[py.String(vm.frame.Code.Names[namei])] = vm.POP()
 	return nil
 }
 
@@ -898,10 +898,10 @@ func do_STORE_NAME(vm *Vm, namei int32) error {
 // attribute of the code object.
 func do_DELETE_NAME(vm *Vm, namei int32) error {
 	name := vm.frame.Code.Names[namei]
-	if _, ok := vm.frame.Locals[name]; !ok {
+	if _, ok := vm.frame.Locals[py.String(name)]; !ok {
 		return py.ExceptionNewf(py.NameError, nameErrorMsg, name)
 	} else {
-		delete(vm.frame.Locals, name)
+		delete(vm.frame.Locals, py.String(name))
 	}
 	return nil
 }
@@ -944,17 +944,17 @@ func do_DELETE_ATTR(vm *Vm, namei int32) error {
 
 // Works as STORE_NAME, but stores the name as a global.
 func do_STORE_GLOBAL(vm *Vm, namei int32) error {
-	vm.frame.Globals[vm.frame.Code.Names[namei]] = vm.POP()
+	vm.frame.Globals[py.String(vm.frame.Code.Names[namei])] = vm.POP()
 	return nil
 }
 
 // Works as DELETE_NAME, but deletes a global name.
 func do_DELETE_GLOBAL(vm *Vm, namei int32) error {
 	name := vm.frame.Code.Names[namei]
-	if _, ok := vm.frame.Globals[name]; !ok {
+	if _, ok := vm.frame.Globals[py.String(name)]; !ok {
 		return py.ExceptionNewf(py.NameError, nameErrorMsg, name)
 	} else {
-		delete(vm.frame.Globals, name)
+		delete(vm.frame.Globals, py.String(name))
 	}
 	return nil
 }
@@ -1010,7 +1010,7 @@ func do_BUILD_LIST(vm *Vm, count int32) error {
 // Pushes a new dictionary object onto the stack. The dictionary is
 // pre-sized to hold count entries.
 func do_BUILD_MAP(vm *Vm, count int32) error {
-	vm.PUSH(py.NewStringDictSized(int(count)))
+	vm.PUSH(py.NewDictSized(int(count)))
 	return nil
 }
 
@@ -1081,7 +1081,7 @@ func do_COMPARE_OP(vm *Vm, opname int32) error {
 // STORE_FAST instruction modifies the namespace.
 func do_IMPORT_NAME(vm *Vm, namei int32) error {
 	name := py.String(vm.frame.Code.Names[namei])
-	__import__, ok := vm.frame.Builtins["__import__"]
+	__import__, ok := vm.frame.Builtins[py.String("__import__")]
 	if !ok {
 		return py.ExceptionNewf(py.ImportError, "__import__ not found")
 	}
@@ -1337,7 +1337,7 @@ func do_LOAD_CLASSDEREF(vm *Vm, i int32) error {
 	name, _ := _var_name(vm, i)
 
 	// Lookup in locals
-	if obj, ok := vm.frame.Locals[name]; ok {
+	if obj, ok := vm.frame.Locals[py.String(name)]; ok {
 		vm.PUSH(obj)
 	}
 	// If that failed look at the cell
@@ -1443,7 +1443,7 @@ func _make_function(vm *Vm, argc int32, opcode OpCode) {
 
 	if num_annotations > 0 {
 		names := vm.POP().(py.Tuple) // names of args with annotations
-		anns := py.NewStringDict()
+		anns := py.NewDict()
 		name_ix := int32(len(names))
 		if num_annotations != name_ix+1 {
 			panic("vm: num_annotations wrong - corrupt bytecode?")
@@ -1452,17 +1452,17 @@ func _make_function(vm *Vm, argc int32, opcode OpCode) {
 			name_ix--
 			name := names[name_ix]
 			value := vm.POP()
-			anns[string(name.(py.String))] = value
+			anns[name.(py.String)] = value
 		}
 		function.Annotations = anns
 	}
 
 	if kwdefaults > 0 {
-		defs := py.NewStringDict()
+		defs := py.NewDict()
 		for kwdefaults--; kwdefaults >= 0; kwdefaults-- {
 			v := vm.POP()   // default value
 			key := vm.POP() // kw only arg name
-			defs[string(key.(py.String))] = v
+			defs[key.(py.String)] = v
 		}
 		function.KwDefaults = defs
 	}
@@ -1582,7 +1582,7 @@ func EvalGetFuncDesc(fn py.Object) string {
 // As py.Call but takes an intepreter Frame object
 //
 // Used to implement some interpreter magic like locals(), globals() etc
-func callInternal(fn py.Object, args py.Tuple, kwargs py.StringDict, f *py.Frame) (py.Object, error) {
+func callInternal(fn py.Object, args py.Tuple, kwargs py.Dict, f *py.Frame) (py.Object, error) {
 	if method, ok := fn.(*py.Method); ok {
 		switch x := method.Internal(); x {
 		case py.InternalMethodNone:
@@ -1632,13 +1632,13 @@ func (vm *Vm) Call(argc int32, starArgs py.Object, starKwargs py.Object) error {
 	const multipleValues = "%s%s got multiple values for keyword argument '%s'"
 
 	// if debugging { debugf("Call %T %v with args = %v, kwargsTuple = %v\n", fnObj, fnObj, args, kwargsTuple) }
-	var kwargs py.StringDict
+	var kwargs py.Dict
 	if len(kwargsTuple) > 0 {
 		// Convert kwargsTuple into dictionary
 		if len(kwargsTuple)%2 != 0 {
 			panic("vm: Odd length kwargsTuple")
 		}
-		kwargs = py.NewStringDict()
+		kwargs = py.NewDict()
 		for i := 0; i < len(kwargsTuple); i += 2 {
 			kPy, ok := kwargsTuple[i].(py.String)
 			if !ok {
@@ -1646,20 +1646,20 @@ func (vm *Vm) Call(argc int32, starArgs py.Object, starKwargs py.Object) error {
 			}
 			k := string(kPy)
 			v := kwargsTuple[i+1]
-			if _, ok := kwargs[k]; ok {
+			if _, ok := kwargs[py.String(k)]; ok {
 				return py.ExceptionNewf(py.TypeError, multipleValues, EvalGetFuncName(fn), EvalGetFuncDesc(fn), k)
 			}
-			kwargs[k] = v
+			kwargs[py.String(k)] = v
 		}
 	}
 
 	// Update with starKwargs if any
 	if starKwargs != nil {
 		if kwargs == nil {
-			kwargs = py.NewStringDict()
+			kwargs = py.NewDict()
 		}
 		// FIXME should be some sort of dictionary iterator...
-		starKwargsDict, ok := starKwargs.(py.StringDict)
+		starKwargsDict, ok := starKwargs.(py.Dict)
 		if !ok {
 			return py.ExceptionNewf(py.SystemError, "FIXME can't use %T as **kwargs", starKwargs)
 		}
@@ -2033,10 +2033,10 @@ func tooManyPositional(co *py.Code, given, defcount int, fastlocals []py.Object)
 		chooseString(given == 1 && kwonly_given == 0, "was", "were"))
 }
 
-func EvalCodeEx(co *py.Code, globals, locals py.StringDict, args []py.Object, kws py.StringDict, defs []py.Object, kwdefs py.StringDict, closure py.Tuple) (retval py.Object, err error) {
+func EvalCodeEx(co *py.Code, globals, locals py.Dict, args []py.Object, kws py.Dict, defs []py.Object, kwdefs py.Dict, closure py.Tuple) (retval py.Object, err error) {
 	total_args := int(co.Argcount + co.Kwonlyargcount)
 	n := len(args)
-	var kwdict py.StringDict
+	var kwdict py.Dict
 
 	if globals == nil {
 		return nil, py.ExceptionNewf(py.SystemError, "PyEval_EvalCodeEx: nil globals")
@@ -2052,7 +2052,7 @@ func EvalCodeEx(co *py.Code, globals, locals py.StringDict, args []py.Object, kw
 
 	/* Parse arguments. */
 	if co.Flags&py.CO_VARKEYWORDS != 0 {
-		kwdict = py.NewStringDict()
+		kwdict = py.NewDict()
 		i := total_args
 		if co.Flags&py.CO_VARARGS != 0 {
 			i++
@@ -2075,7 +2075,7 @@ func EvalCodeEx(co *py.Code, globals, locals py.StringDict, args []py.Object, kw
 	for keyword, value := range kws {
 		j := 0
 		for ; j < total_args; j++ {
-			if co.Varnames[j] == keyword {
+			if co.Varnames[j] == string(keyword.(py.String)) {
 				goto kw_found
 			}
 		}
@@ -2122,7 +2122,7 @@ func EvalCodeEx(co *py.Code, globals, locals py.StringDict, args []py.Object, kw
 			}
 			name := co.Varnames[i]
 			if kwdefs != nil {
-				if def, ok := kwdefs[name]; ok {
+				if def, ok := kwdefs[py.String(name)]; ok {
 					fastlocals[i] = def
 					continue
 				}
@@ -2162,7 +2162,7 @@ func EvalCodeEx(co *py.Code, globals, locals py.StringDict, args []py.Object, kw
 	return RunFrame(f)
 }
 
-func EvalCode(co *py.Code, globals, locals py.StringDict) (py.Object, error) {
+func EvalCode(co *py.Code, globals, locals py.Dict) (py.Object, error) {
 	return EvalCodeEx(co,
 		globals, locals,
 		nil,
@@ -2178,7 +2178,7 @@ func EvalCode(co *py.Code, globals, locals py.StringDict) (py.Object, error) {
 // Returns an Object and an error.  The error will be a py.ExceptionInfo
 //
 // This is the equivalent of PyEval_EvalCode with closure support
-func Run(globals, locals py.StringDict, code *py.Code, closure py.Tuple) (res py.Object, err error) {
+func Run(globals, locals py.Dict, code *py.Code, closure py.Tuple) (res py.Object, err error) {
 	return EvalCodeEx(code,
 		globals, locals,
 		nil,

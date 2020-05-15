@@ -52,7 +52,7 @@ func (o Int) Type() *Type {
 }
 
 // IntNew
-func IntNew(metatype *Type, args Tuple, kwargs StringDict) (Object, error) {
+func IntNew(metatype *Type, args Tuple, kwargs Dict) (Object, error) {
 	var xObj Object = Int(0)
 	var baseObj Object
 	base := 0

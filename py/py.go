@@ -15,7 +15,7 @@ type Object interface {
 
 // Optional interfaces
 type IGetDict interface {
-	GetDict() StringDict
+	GetDict() Dict
 }
 type IGoInt interface {
 	GoInt() (int, error)
@@ -27,9 +27,9 @@ type IGoInt64 interface {
 // Some well known objects
 var (
 	// Set in vm/eval.go - to avoid circular import
-	VmRun        func(globals, locals StringDict, code *Code, closure Tuple) (res Object, err error)
+	VmRun        func(globals, locals Dict, code *Code, closure Tuple) (res Object, err error)
 	VmRunFrame   func(frame *Frame) (res Object, err error)
-	VmEvalCodeEx func(co *Code, globals, locals StringDict, args []Object, kws StringDict, defs []Object, kwdefs StringDict, closure Tuple) (retval Object, err error)
+	VmEvalCodeEx func(co *Code, globals, locals Dict, args []Object, kws Dict, defs []Object, kwdefs Dict, closure Tuple) (retval Object, err error)
 
 	// See compile/compile.go - set to avoid circular import
 	Compile func(str, filename, mode string, flags int, dont_inherit bool) (Object, error)
@@ -460,7 +460,7 @@ type I__subclasscheck__ interface {
 // arg2, ...).
 //object.__call__(self[, args...])
 type I__call__ interface {
-	M__call__(args Tuple, kwargs StringDict) (Object, error)
+	M__call__(args Tuple, kwargs Dict) (Object, error)
 }
 
 // The following methods can be defined to implement container
@@ -586,7 +586,7 @@ type I_send interface {
 	Send(value Object) (Object, error)
 }
 type I_throw interface {
-	Throw(args Tuple, kwargs StringDict) (Object, error)
+	Throw(args Tuple, kwargs Dict) (Object, error)
 }
 type I_close interface {
 	Close() (Object, error)

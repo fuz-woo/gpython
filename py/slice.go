@@ -34,7 +34,7 @@ func NewSlice(start, stop, step Object) *Slice {
 }
 
 // SliceNew
-func SliceNew(metatype *Type, args Tuple, kwargs StringDict) (Object, error) {
+func SliceNew(metatype *Type, args Tuple, kwargs Dict) (Object, error) {
 	var start Object = None
 	var stop Object = None
 	var step Object = None
@@ -177,19 +177,19 @@ func (a *Slice) M__ne__(other Object) (Object, error) {
 }
 
 func init() {
-	SliceType.Dict["start"] = &Property{
+	SliceType.Dict[String("start")] = &Property{
 		Fget: func(self Object) (Object, error) {
 			selfSlice := self.(*Slice)
 			return selfSlice.Start, nil
 		},
 	}
-	SliceType.Dict["stop"] = &Property{
+	SliceType.Dict[String("stop")] = &Property{
 		Fget: func(self Object) (Object, error) {
 			selfSlice := self.(*Slice)
 			return selfSlice.Stop, nil
 		},
 	}
-	SliceType.Dict["step"] = &Property{
+	SliceType.Dict[String("step")] = &Property{
 		Fget: func(self Object) (Object, error) {
 			selfSlice := self.(*Slice)
 			return selfSlice.Step, nil
